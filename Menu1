@@ -1,0 +1,536 @@
+-- JS MENU V1 - Layout lateral estilo ICE/Toddy's
+-- Atualizado com subtítulo “by Jstz7x”
+-- Coloque este LocalScript em StarterGui
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+
+local velocidadeNormal = 16
+local velocidadeRapida = 300
+
+-- Criar ScreenGui
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "JSMenuV1"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
+
+-- Container principal (centralizado + movível)
+local container = Instance.new("Frame")
+container.Name = "Container"
+container.Size = UDim2.new(0, 720, 0, 380)
+container.Position = UDim2.new(0.5, -360, 0.5, -190)
+container.BackgroundTransparency = 1
+container.Active = true
+container.Draggable = true
+container.Parent = screenGui
+
+-- Painel de fundo (rounded)
+local background = Instance.new("Frame")
+background.Name = "Background"
+background.Size = UDim2.new(1, 0, 1, 0)
+background.Position = UDim2.new(0, 0, 0, 0)
+background.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+background.BorderSizePixel = 0
+background.Parent = container
+Instance.new("UICorner", background).CornerRadius = UDim.new(0, 12)
+
+-- Cabeçalho
+local header = Instance.new("Frame", background)
+header.Size = UDim2.new(1, 0, 0, 44)
+header.Position = UDim2.new(0, 0, 0, 0)
+header.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+header.BorderSizePixel = 0
+Instance.new("UICorner", header).CornerRadius = UDim.new(0, 12)
+
+-- Título + subtítulo
+local titleContainer = Instance.new("Frame", header)
+titleContainer.Size = UDim2.new(1, -80, 1, 0)
+titleContainer.Position = UDim2.new(0, 20, 0, 0)
+titleContainer.BackgroundTransparency = 1
+
+local title = Instance.new("TextLabel", titleContainer)
+title.Size = UDim2.new(1, 0, 0.6, 0)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "JS MENU V1"
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.fromRGB(235, 235, 235)
+title.TextScaled = true
+title.TextWrapped = true
+title.TextYAlignment = Enum.TextYAlignment.Bottom
+title.TextXAlignment = Enum.TextXAlignment.Left
+
+local subtitle = Instance.new("TextLabel", titleContainer)
+subtitle.Size = UDim2.new(1, 0, 0.4, 0)
+subtitle.Position = UDim2.new(0, 0, 0.6, 0)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "by Jstz7x"
+subtitle.Font = Enum.Font.Gotham
+subtitle.TextColor3 = Color3.fromRGB(160, 160, 160)
+subtitle.TextScaled = true
+subtitle.TextWrapped = true
+subtitle.TextYAlignment = Enum.TextYAlignment.Top
+subtitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Botão fechar
+local closeBtn = Instance.new("TextButton", header)
+closeBtn.Size = UDim2.new(0, 28, 0, 26)
+closeBtn.Position = UDim2.new(1, -42, 0, 9)
+closeBtn.Text = "✕"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextScaled = true
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.BackgroundColor3 = Color3.fromRGB(190, 40, 40)
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+-- Sidebar + content
+local sidebar = Instance.new("Frame", background)
+sidebar.Size = UDim2.new(0, 160, 1, -60)
+sidebar.Position = UDim2.new(0, 12, 0, 56)
+sidebar.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+sidebar.BorderSizePixel = 0
+Instance.new("UICorner", sidebar).CornerRadius = UDim.new(0, 8)
+
+local content = Instance.new("Frame", background)
+content.Size = UDim2.new(1, -200, 1, -80)
+content.Position = UDim2.new(0, 180, 0, 56)
+content.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+content.BorderSizePixel = 0
+Instance.new("UICorner", content).CornerRadius = UDim.new(0, 8)
+
+-- Scrolling área
+local contentInner = Instance.new("ScrollingFrame", content)
+contentInner.Size = UDim2.new(1, -24, 1, -24)
+contentInner.Position = UDim2.new(0, 12, 0, 12)
+contentInner.BackgroundTransparency = 1
+contentInner.CanvasSize = UDim2.new(0, 0, 1, 0)
+contentInner.ScrollBarThickness = 6
+
+-- Abas
+local tabs = {
+	"Funções",
+	"Teleporte",
+	"PvP",
+	"Visual",
+	"Config",
+	"Farm",
+	"Outros",
+	"Aimbot",
+}
+
+local tabButtons = {}
+local tabFrames = {}
+
+local function createSidebarButton(text, yIndex)
+	local btn = Instance.new("TextButton", sidebar)
+	btn.Size = UDim2.new(1, -20, 0, 32)
+	btn.Position = UDim2.new(0, 10, 0, 8 + (yIndex-1) * 38)
+	btn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	btn.Text = "  " .. text
+	btn.TextXAlignment = Enum.TextXAlignment.Left
+	btn.Font = Enum.Font.Gotham
+	btn.TextColor3 = Color3.fromRGB(220,220,220)
+	btn.TextScaled = true
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+	return btn
+end
+
+for i, name in ipairs(tabs) do
+	local btn = createSidebarButton(name, i)
+	tabButtons[name] = btn
+
+	local page = Instance.new("Frame", contentInner)
+	page.Name = name .. "_Page"
+	page.Size = UDim2.new(1, 0, 1, 0)
+	page.BackgroundTransparency = 1
+	page.Visible = false
+	tabFrames[name] = page
+end
+
+local function showTab(name)
+	for n, f in pairs(tabFrames) do
+		f.Visible = (n == name)
+	end
+	for n, b in pairs(tabButtons) do
+		if n == name then
+			b.BackgroundColor3 = Color3.fromRGB(50,50,50)
+			b.TextColor3 = Color3.fromRGB(255,255,255)
+		else
+			b.BackgroundColor3 = Color3.fromRGB(35,35,35)
+			b.TextColor3 = Color3.fromRGB(220,220,220)
+		end
+	end
+end
+
+showTab("Funções")
+
+for name, btn in pairs(tabButtons) do
+	btn.MouseButton1Click:Connect(function()
+		showTab(name)
+	end)
+end
+
+-- Funções utilitárias de UI
+local function createCompactSwitch(parent, text, yOffset)
+	local row = Instance.new("Frame", parent)
+	row.Size = UDim2.new(1, -20, 0, 32)
+	row.Position = UDim2.new(0, 10, 0, 38 + (yOffset-1) * 40)
+	row.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	Instance.new("UICorner", row).CornerRadius = UDim.new(0, 8)
+
+	local label = Instance.new("TextLabel", row)
+	label.Size = UDim2.new(0.78, 0, 1, 0)
+	label.Position = UDim2.new(0.02, 0, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.Font = Enum.Font.Gotham
+	label.TextColor3 = Color3.fromRGB(235,235,235)
+	label.TextScaled = true
+	label.TextXAlignment = Enum.TextXAlignment.Left
+
+	local toggle = Instance.new("TextButton", row)
+	toggle.Size = UDim2.new(0, 40, 0, 20)
+	toggle.Position = UDim2.new(0.82, 0, 0.15, 0)
+	toggle.BackgroundColor3 = Color3.fromRGB(110,110,110)
+	toggle.Text = ""
+	Instance.new("UICorner", toggle).CornerRadius = UDim.new(1, 0)
+
+	local knob = Instance.new("Frame", toggle)
+	knob.Size = UDim2.new(0, 16, 0, 16)
+	knob.Position = UDim2.new(0, 3, 0.1, 0)
+	knob.BackgroundColor3 = Color3.fromRGB(250,250,250)
+	Instance.new("UICorner", knob).CornerRadius = UDim.new(1, 0)
+
+	return toggle, knob
+end
+
+-- ABA Funções
+local funPage = tabFrames["Funções"]
+
+local pageTitle = Instance.new("TextLabel", funPage)
+pageTitle.Size = UDim2.new(1, 0, 0, 24)
+pageTitle.Position = UDim2.new(0, 0, 0, 6)
+pageTitle.BackgroundTransparency = 1
+pageTitle.Text = "Funções"
+pageTitle.TextColor3 = Color3.fromRGB(240,240,240)
+pageTitle.Font = Enum.Font.GothamBold
+pageTitle.TextScaled = true
+pageTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+local runToggle, runKnob = createCompactSwitch(funPage, "🏃 Correr Rápido", 1)
+local specToggle, specKnob = createCompactSwitch(funPage, "👁️ Modo Espectador", 2)
+
+local correndo = false
+local espectador = false
+
+runToggle.MouseButton1Click:Connect(function()
+	local char = player.Character or player.CharacterAdded:Wait()
+	local humanoid = char:WaitForChild("Humanoid")
+	if not correndo then
+		humanoid.WalkSpeed = velocidadeRapida
+		runToggle.BackgroundColor3 = Color3.fromRGB(0,200,0)
+		runKnob.Position = UDim2.new(1, -18, 0.1, 0)
+	else
+		humanoid.WalkSpeed = velocidadeNormal
+		runToggle.BackgroundColor3 = Color3.fromRGB(110,110,110)
+		runKnob.Position = UDim2.new(0, 3, 0.1, 0)
+	end
+	correndo = not correndo
+end)
+
+specToggle.MouseButton1Click:Connect(function()
+	local char = player.Character or player.CharacterAdded:Wait()
+	if not espectador then
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.Transparency = 0.8
+				part.CanCollide = false
+			end
+		end
+		specToggle.BackgroundColor3 = Color3.fromRGB(0,200,0)
+		specKnob.Position = UDim2.new(1, -18, 0.1, 0)
+	else
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.Transparency = 0
+				part.CanCollide = true
+			end
+		end
+		specToggle.BackgroundColor3 = Color3.fromRGB(110,110,110)
+		specKnob.Position = UDim2.new(0, 3, 0.1, 0)
+	end
+	espectador = not espectador
+end)
+
+-- Botão fechar/reabrir
+closeBtn.MouseButton1Click:Connect(function()
+	background.Visible = false
+	screenGui.ReopenBtn.Visible = true
+end)
+
+local reopenFixed = Instance.new("TextButton", screenGui)
+reopenFixed.Name = "ReopenBtn"
+reopenFixed.Size = UDim2.new(0, 140, 0, 34)
+reopenFixed.Position = UDim2.new(0, 18, 1, -60)
+reopenFixed.BackgroundColor3 = Color3.fromRGB(0,150,255)
+reopenFixed.TextColor3 = Color3.fromRGB(255,255,255)
+reopenFixed.Font = Enum.Font.GothamBold
+reopenFixed.TextScaled = true
+reopenFixed.Text = "🔧 Reabrir Menu / Normal"
+Instance.new("UICorner", reopenFixed).CornerRadius = UDim.new(0, 8)
+reopenFixed.Visible = false
+
+reopenFixed.MouseButton1Click:Connect(function()
+	background.Visible = true
+	reopenFixed.Visible = false
+	local char = player.Character or player.CharacterAdded:Wait()
+	local humanoid = char:FindFirstChild("Humanoid")
+	if humanoid then
+		humanoid.WalkSpeed = velocidadeNormal
+	end
+	correndo = false
+end)
+
+showTab("Funções")
+
+-- ABA PvP: Aimbot grudando automático
+local pvpPage = tabFrames["PvP"]
+local aimbotToggle, aimbotKnob = createCompactSwitch(pvpPage, "🎯 Aimbot", 1)
+local aimbotAtivo = false
+local camera = workspace.CurrentCamera
+local AIM_SMOOTH = 0.25
+
+local function isEnemy(plr)
+	if not plr or not plr:IsA("Player") then return false end
+	local myTeam = player.Team
+	local theirTeam = plr.Team
+	if myTeam and theirTeam then
+		return myTeam ~= theirTeam
+	end
+	return true
+end
+
+local function getClosestEnemy()
+	local closestPlayer = nil
+	local shortestDistance = math.huge
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("Humanoid") and plr.Character.Humanoid.Health > 0 then
+			if isEnemy(plr) then
+				local hrp = plr.Character.HumanoidRootPart
+				local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
+				if onScreen then
+					local center = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y/2)
+					local dist = (Vector2.new(screenPos.X, screenPos.Y) - center).Magnitude
+					if dist < shortestDistance then
+						shortestDistance = dist
+						closestPlayer = plr
+					end
+				end
+			end
+		end
+	end
+	return closestPlayer
+end
+
+local aimbotConnection
+aimbotToggle.MouseButton1Click:Connect(function()
+	if not aimbotAtivo then
+		aimbotAtivo = true
+		aimbotToggle.BackgroundColor3 = Color3.fromRGB(0,200,0)
+		aimbotKnob.Position = UDim2.new(1,-18,0.1,0)
+		aimbotConnection = RunService.RenderStepped:Connect(function(dt)
+			if not aimbotAtivo then return end
+			local targetPlayer = getClosestEnemy()
+			if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+				local targetPos = targetPlayer.Character.HumanoidRootPart.Position
+				local camPos = camera.CFrame.Position
+				local desiredCFrame = CFrame.new(camPos, targetPos)
+				camera.CFrame = camera.CFrame:Lerp(desiredCFrame, math.clamp(AIM_SMOOTH*(dt*60),0,1))
+			end
+		end)
+	else
+		aimbotAtivo = false
+		aimbotToggle.BackgroundColor3 = Color3.fromRGB(110,110,110)
+		aimbotKnob.Position = UDim2.new(0,3,0.1,0)
+		if aimbotConnection then aimbotConnection:Disconnect(); aimbotConnection=nil end
+	end
+end)
+
+-- ABA VISUAL: ESP LINHA + ESP CAIXA (INTEGRADO)
+local visualPage = tabFrames["Visual"]
+
+-- Título da aba Visual
+local visualTitle = Instance.new("TextLabel", visualPage)
+visualTitle.Size = UDim2.new(1, 0, 0, 24)
+visualTitle.Position = UDim2.new(0, 0, 0, 6)
+visualTitle.BackgroundTransparency = 1
+visualTitle.Text = "Visual"
+visualTitle.TextColor3 = Color3.fromRGB(240,240,240)
+visualTitle.Font = Enum.Font.GothamBold
+visualTitle.TextScaled = true
+visualTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Toggle ESP Linha
+local espLineToggle, espLineKnob = createCompactSwitch(visualPage, "👁️ ESP Linha", 1)
+local espLineAtivo = false
+
+-- Toggle ESP Caixa
+local espBoxToggle, espBoxKnob = createCompactSwitch(visualPage, "📦 ESP Caixa", 2)
+local espBoxAtivo = false
+
+local camera = workspace.CurrentCamera
+local espLines = {}
+local espBoxes = {}
+
+-- Função atualizar ESP Linha
+local function atualizarESPLine()
+	for _, p in pairs(Players:GetPlayers()) do
+		if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and (isEnemy(p)) then
+			local hrp = p.Character.HumanoidRootPart
+			local screenPos, onScreen = camera:WorldToViewportPoint(hrp.Position)
+
+			if not espLines[p] then
+				local line = Drawing.new("Line")
+				line.Color = Color3.fromRGB(0, 255, 0)
+				line.Thickness = 2
+				line.Transparency = 1
+				line.Visible = true
+				espLines[p] = line
+			end
+
+			local line = espLines[p]
+			if onScreen then
+				line.From = Vector2.new(camera.ViewportSize.X/2, camera.ViewportSize.Y)
+				line.To = Vector2.new(screenPos.X, screenPos.Y)
+				line.Visible = true
+			else
+				line.Visible = false
+			end
+		else
+			-- se não cumprir requisitos, remover se existir
+			if espLines[p] then
+				espLines[p]:Remove()
+				espLines[p] = nil
+			end
+		end
+	end
+
+	-- remover linhas de jogadores desconectados/inválidos (segurança extra)
+	for p, line in pairs(espLines) do
+		if not Players:FindFirstChild(p.Name) or not p.Character or not p.Character:FindFirstChild("HumanoidRootPart") or not isEnemy(p) then
+			line:Remove()
+			espLines[p] = nil
+		end
+	end
+end
+
+-- Função atualizar ESP Caixa
+local function atualizarESPBox()
+	for _, p in pairs(Players:GetPlayers()) do
+		if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and (isEnemy(p)) then
+			local hrp = p.Character.HumanoidRootPart
+
+			if not espBoxes[p] then
+				local box = Instance.new("BoxHandleAdornment")
+				box.Adornee = hrp
+				box.Size = Vector3.new(2,5,1)
+				box.Color3 = Color3.fromRGB(0, 255, 0)
+				box.AlwaysOnTop = true
+				box.ZIndex = 10
+				box.Parent = workspace
+				espBoxes[p] = box
+			else
+				-- garantir que Adornee esteja atualizado
+				local existing = espBoxes[p]
+				if existing and existing.Adornee ~= hrp then
+					existing.Adornee = hrp
+				end
+			end
+		else
+			-- remover caixa se não cumprir requisitos
+			if espBoxes[p] then
+				espBoxes[p]:Destroy()
+				espBoxes[p] = nil
+			end
+		end
+	end
+
+	-- remover caixas de jogadores desconectados/inválidos
+	for p, box in pairs(espBoxes) do
+		if not Players:FindFirstChild(p.Name) or not p.Character or not p.Character:FindFirstChild("HumanoidRootPart") or not isEnemy(p) then
+			box:Destroy()
+			espBoxes[p] = nil
+		end
+	end
+end
+
+-- Conectar toggle ESP Linha
+local espLineConnection
+espLineToggle.MouseButton1Click:Connect(function()
+	if not espLineAtivo then
+		espLineAtivo = true
+		espLineToggle.BackgroundColor3 = Color3.fromRGB(0,200,0)
+		espLineKnob.Position = UDim2.new(1, -18, 0.1, 0)
+		espLineConnection = RunService.RenderStepped:Connect(function()
+			if espLineAtivo then
+				atualizarESPLine()
+			end
+		end)
+	else
+		espLineAtivo = false
+		espLineToggle.BackgroundColor3 = Color3.fromRGB(110,110,110)
+		espLineKnob.Position = UDim2.new(0, 3, 0.1, 0)
+		if espLineConnection then
+			espLineConnection:Disconnect()
+			espLineConnection = nil
+		end
+		for _, line in pairs(espLines) do
+			line:Remove()
+		end
+		espLines = {}
+	end
+end)
+
+-- Conectar toggle ESP Caixa
+local espBoxConnection
+espBoxToggle.MouseButton1Click:Connect(function()
+	if not espBoxAtivo then
+		espBoxAtivo = true
+		espBoxToggle.BackgroundColor3 = Color3.fromRGB(0,200,0)
+		espBoxKnob.Position = UDim2.new(1, -18, 0.1, 0)
+		espBoxConnection = RunService.RenderStepped:Connect(function()
+			if espBoxAtivo then
+				atualizarESPBox()
+			end
+		end)
+	else
+		espBoxAtivo = false
+		espBoxToggle.BackgroundColor3 = Color3.fromRGB(110,110,110)
+		espBoxKnob.Position = UDim2.new(0, 3, 0.1, 0)
+		if espBoxConnection then
+			espBoxConnection:Disconnect()
+			espBoxConnection = nil
+		end
+		for _, box in pairs(espBoxes) do
+			box:Destroy()
+		end
+		espBoxes = {}
+	end
+end)
+
+-- Limpeza ao sair do jogo / player removido
+Players.PlayerRemoving:Connect(function(p)
+	if espLines[p] then
+		espLines[p]:Remove()
+		espLines[p] = nil
+	end
+	if espBoxes[p] then
+		espBoxes[p]:Destroy()
+		espBoxes[p] = nil
+	end
+end)
+
+print("JS MENU V1 carregado com 'by Jstz7x' (ESP integrado, ignorando próprio time)")
